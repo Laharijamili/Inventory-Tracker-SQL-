@@ -1,0 +1,35 @@
+CREATE DATABASE IF NOT EXISTS inventory_db;
+USE inventory_db;
+
+-- 1. Categories Table
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Products Table
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    sku VARCHAR(50) NOT NULL UNIQUE,
+    category_id INT,
+    quantity INT DEFAULT 0,
+    price DECIMAL(10, 2) NOT NULL,
+    min_threshold INT DEFAULT 5, -- Triggers low stock alert if quantity falls below this
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+);
+
+-- 3. Transaction Logs Table
+CREATE TABLE stock_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT,
+    change_type ENUM('ADDITION', 'DEDUCTION') NOT NULL,
+    quantity_changed INT NOT NULL,
+    logged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+-- Insert Default Mock Categories
+INSERT INTO categories (name) VALUES ('Electronics'), ('Apparel'), ('Office Supplies');
